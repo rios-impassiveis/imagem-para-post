@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Imagem-para-Post</title>
+  <meta name="description" content="Transforme qualquer imagem em uma Featured Image no tamanho certo para WordPress e WhatsApp. Tudo acontece no seu navegador.">
+  <meta name="color-scheme" content="dark">
+  <meta name="theme-color" content="#14171d">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Barra superior -->
+  <header class="topbar">
+    <a class="brand" href="./">
+      <svg class="brand-mark" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M7 2v15h15" /><path d="M2 7h15v15" />
+      </svg>
+      <span>Imagem-para-Post</span>
+    </a>
+
+    <div class="source" id="sourceInfo" hidden>
+      <span class="source-name" id="sourceName"></span>
+      <span class="source-meta" id="sourceMeta"></span>
+    </div>
+
+    <button type="button" class="btn btn-quiet" id="replaceBtn" aria-label="Trocar imagem" hidden>
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8M4 4v4h4M4 13a8 8 0 0 0 14.3 4.9L20 16M20 20v-4h-4" /></svg>
+      <span>Trocar imagem</span>
+    </button>
+  </header>
+
+  <main>
+
+    <!-- Tela 1: upload -->
+    <section class="upload" id="uploadView" aria-labelledby="uploadTitle">
+      <h1 id="uploadTitle">Sua imagem no tamanho certo para o post</h1>
+      <p class="lead">Recorte, comprima e exporte uma Featured Image de 1200&nbsp;×&nbsp;628&nbsp;px para o WordPress e para a prévia de links do WhatsApp.</p>
+
+      <label class="dropzone" id="dropzone">
+        <input type="file" id="fileInput" class="visually-hidden" accept="image/png,image/jpeg,image/webp">
+        <span class="crop-corners" aria-hidden="true"></span>
+        <svg class="dz-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 15V4M7 9l5-5 5 5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+        </svg>
+        <span class="dz-title">Arraste uma imagem para cá</span>
+        <span class="dz-sub">ou clique para escolher. PNG, JPG ou WEBP.</span>
+        <span class="measure measure-x" aria-hidden="true"><span>1200 px</span></span>
+        <span class="measure measure-y" aria-hidden="true"><span>628 px</span></span>
+      </label>
+
+      <p class="upload-error" id="uploadError" role="alert" hidden></p>
+
+      <p class="privacy">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>
+        <span>A imagem é processada no seu navegador e nunca é enviada para um servidor. Também dá para colar com Ctrl+V.</span>
+      </p>
+    </section>
+
+    <!-- Tela 2: editor (split screen) -->
+    <section class="editor" id="editorView" hidden>
+
+      <!-- Painel de ajustes -->
+      <div class="panel" role="group" aria-label="Ajustes da imagem">
+
+        <fieldset class="group">
+          <legend>Tamanho</legend>
+          <label class="field-label" for="preset">Destino</label>
+          <select id="preset">
+            <option value="wordpress">WordPress / WhatsApp (1200x628)</option>
+            <option value="instagram">Instagram Post (1080x1080)</option>
+            <option value="custom">Customizado</option>
+          </select>
+          <div class="dims">
+            <label class="dim">
+              <span>Largura</span>
+              <span class="dim-input">
+                <input type="number" id="customW" min="16" max="4096" step="1" inputmode="numeric" disabled>
+                <span class="unit">px</span>
+              </span>
+            </label>
+            <span class="dims-x" aria-hidden="true">×</span>
+            <label class="dim">
+              <span>Altura</span>
+              <span class="dim-input">
+                <input type="number" id="customH" min="16" max="4096" step="1" inputmode="numeric" disabled>
+                <span class="unit">px</span>
+              </span>
+            </label>
+          </div>
+          <p class="hint" id="ratioLabel">Proporção 1,91:1</p>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend>Enquadramento</legend>
+          <div class="field">
+            <div class="field-head"><label for="zoom">Zoom</label><output id="zoomOut" for="zoom">100%</output></div>
+            <input type="range" id="zoom" min="10" max="400" step="1" value="100">
+          </div>
+          <div class="chips">
+            <button type="button" class="chip" id="fitCover">Preencher</button>
+            <button type="button" class="chip" id="fitContain">Imagem inteira</button>
+            <button type="button" class="chip" id="centerBtn">Centralizar</button>
+          </div>
+          <div class="field" id="posXField">
+            <div class="field-head"><label for="posX">Posição horizontal (X)</label><output id="posXOut" for="posX">Centro</output></div>
+            <input type="range" id="posX" class="range-neutral" min="0" max="100" step="0.5" value="50">
+            <div class="scale-labels" aria-hidden="true"><span>Esquerda</span><span>Direita</span></div>
+          </div>
+          <div class="field" id="posYField">
+            <div class="field-head"><label for="posY">Posição vertical (Y)</label><output id="posYOut" for="posY">Centro</output></div>
+            <input type="range" id="posY" class="range-neutral" min="0" max="100" step="0.5" value="50">
+            <div class="scale-labels" aria-hidden="true"><span>Topo</span><span>Base</span></div>
+          </div>
+          <p class="hint" id="posHint">Arraste a imagem no preview para reposicionar.</p>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend>Cor de fundo</legend>
+          <p class="hint hint-top">Preenche as sobras quando a imagem não cobre o quadro inteiro.</p>
+          <div class="color-row">
+            <label class="color-well">
+              <input type="color" id="bgColor" value="#ffffff">
+              <span class="visually-hidden">Escolher cor de fundo</span>
+            </label>
+            <label class="hex">
+              <span class="visually-hidden">Código hexadecimal da cor</span>
+              <input type="text" id="bgHex" value="#FFFFFF" maxlength="7" spellcheck="false" autocomplete="off">
+            </label>
+          </div>
+          <div class="chips">
+            <button type="button" class="chip chip-swatch" data-swatch data-color="#ffffff" style="--sw:#ffffff">Branco</button>
+            <button type="button" class="chip chip-swatch" data-swatch data-color="#000000" style="--sw:#000000">Preto</button>
+            <button type="button" class="chip chip-swatch" data-swatch id="edgeSwatch" data-color="#808080" style="--sw:#808080" title="Média das cores nas bordas da imagem">Bordas da imagem</button>
+          </div>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend>Formato de saída</legend>
+          <div class="formats">
+            <label class="format">
+              <input type="radio" name="format" value="webp" checked>
+              <span class="format-body"><strong>.WEBP</strong><small>Recomendado para WordPress</small></span>
+            </label>
+            <label class="format">
+              <input type="radio" name="format" value="jpg">
+              <span class="format-body"><strong>.JPG</strong><small>Abre em qualquer lugar</small></span>
+            </label>
+          </div>
+          <p class="hint hint-warn" id="webpNote" hidden>Este navegador não gera WEBP. Use JPG ou abra o app no Chrome, Edge ou Firefox.</p>
+        </fieldset>
+
+        <fieldset class="group">
+          <legend>Qualidade</legend>
+          <div class="field">
+            <div class="field-head"><label for="quality">Compressão</label><output id="qualityOut" for="quality">82%</output></div>
+            <input type="range" id="quality" min="10" max="100" step="1" value="82">
+            <div class="scale-labels" aria-hidden="true"><span>Arquivo menor</span><span>Mais nitidez</span></div>
+          </div>
+        </fieldset>
+
+        <button type="button" class="btn btn-quiet btn-block" id="resetBtn">Restaurar padrões</button>
+      </div>
+
+      <!-- Preview em tempo real: o canvas tem o tamanho exato do arquivo final -->
+      <div class="stage" id="stage">
+        <div class="frame" id="frame" tabindex="0" role="img"
+             aria-label="Preview da imagem final. Arraste para reposicionar, use as setas para mover e + ou − para zoom.">
+          <canvas id="previewCanvas" width="1200" height="628"></canvas>
+          <span class="thirds" aria-hidden="true"></span>
+          <span class="crop-corners" aria-hidden="true"></span>
+          <span class="measure measure-x" aria-hidden="true"><span id="measureW">1200 px</span></span>
+          <span class="measure measure-y" aria-hidden="true"><span id="measureH">628 px</span></span>
+        </div>
+      </div>
+
+      <!-- Saída: tamanho estimado + exportação -->
+      <div class="output">
+        <div class="size is-stale" id="sizeBox" data-level="pending">
+          <p class="size-line" aria-live="polite">Tamanho final: <strong id="sizeValue">calculando…</strong></p>
+          <div class="meter" aria-hidden="true">
+            <span class="meter-fill" id="meterFill"></span>
+            <span class="meter-tick" style="--at:50%"><span>200 KB</span></span>
+            <span class="meter-tick" style="--at:75%"><span>300 KB</span></span>
+          </div>
+          <p class="size-note" id="sizeNote"></p>
+          <p class="size-saving" id="sizeSaving"></p>
+        </div>
+
+        <div class="export">
+          <label class="filename">
+            <span class="field-label">Nome do arquivo</span>
+            <span class="filename-box">
+              <input type="text" id="fileName" spellcheck="false" autocomplete="off">
+              <span id="fileExt">.webp</span>
+            </span>
+          </label>
+          <button type="button" class="btn btn-primary" id="exportBtn">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" /></svg>
+            <span>Exportar imagem</span>
+          </button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Aviso ao arrastar um arquivo com o editor aberto -->
+  <div class="drop-overlay" aria-hidden="true">
+    <span class="crop-corners"></span>
+    <p>Solte para trocar a imagem</p>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
